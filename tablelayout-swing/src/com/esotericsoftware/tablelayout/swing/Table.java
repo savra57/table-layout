@@ -12,8 +12,6 @@ import javax.swing.JLabel;
 
 import com.esotericsoftware.tablelayout.BaseTableLayout;
 import com.esotericsoftware.tablelayout.Cell;
-import com.esotericsoftware.tablelayout.Value;
-import com.esotericsoftware.tablelayout.BaseTableLayout.Debug;
 
 public class Table extends JComponent {
 	private final TableLayout layout;
@@ -31,15 +29,15 @@ public class Table extends JComponent {
 
 			public Dimension preferredLayoutSize (Container parent) {
 				layout.layout(); // BOZO - Cache layout?
-				prefSize.width = (int)layout.getMinWidth();
-				prefSize.height = (int)layout.getMinHeight();
+				prefSize.width = layout.getMinWidth();
+				prefSize.height = layout.getMinHeight();
 				return prefSize;
 			}
 
 			public Dimension minimumLayoutSize (Container parent) {
 				layout.layout(); // BOZO - Cache layout?
-				minSize.width = (int)layout.getMinWidth();
-				minSize.height = (int)layout.getMinHeight();
+				minSize.width = layout.getMinWidth();
+				minSize.height = layout.getMinHeight();
 				return minSize;
 			}
 
@@ -61,6 +59,10 @@ public class Table extends JComponent {
 		invalidate();
 	}
 
+	public Component register (String name, Component widget) {
+		return layout.register(name, widget);
+	}
+
 	public Cell addCell (String text) {
 		return addCell(new JLabel(text));
 	}
@@ -78,12 +80,15 @@ public class Table extends JComponent {
 	}
 
 	/** Adds a new cell to the table with the specified Components in a {@link Stack}.
-	 * @param components May be null to add a cell without an Component. */
-	public Cell stack (Component... components) {
-		Stack stack = new Stack();
-		for (int i = 0, n = components.length; i < n; i++)
-			stack.add(components[i]);
-		return addCell(stack);
+	 * @see TableLayout#stack(Component...)
+	 * @param Component May be null to add a cell without an Component. */
+	public Cell stack (Component... Component) {
+		return layout.stack(Component);
+	}
+
+	/** Creates a new table with the same Skin and AssetManager as this table. */
+	public Table newTable () {
+		return layout.getToolkit().newTable(this);
 	}
 
 	/** Indicates that subsequent cells should be added to a new row and returns the cell values that will be used as the defaults
@@ -91,6 +96,12 @@ public class Table extends JComponent {
 	 * @see TableLayout#row() */
 	public Cell row () {
 		return layout.row();
+	}
+
+	/** Parses a table description and adds the Components and cells to the table.
+	 * @see TableLayout#parse(String) */
+	public void parse (String tableDescription) {
+		layout.parse(tableDescription);
 	}
 
 	/** Gets the cell values that will be used as the defaults for all cells in the specified column.
@@ -118,10 +129,43 @@ public class Table extends JComponent {
 		layout.reset();
 	}
 
+	/** Returns the widget with the specified name, anywhere in the table hierarchy. */
+	public Component getWidget (String name) {
+		return layout.getWidget(name);
+	}
+
+	/** Returns all named widgets, anywhere in the table hierarchy. */
+	public List<Component> getWidgets () {
+		return layout.getWidgets();
+	}
+
+	/** Returns all widgets with the specified name prefix, anywhere in the table hierarchy. */
+	public List<Component> getWidgets (String namePrefix) {
+		return layout.getWidgets(namePrefix);
+	}
+
 	/** Returns the cell for the specified Component, anywhere in the table hierarchy.
 	 * @see TableLayout#getCell(Component) */
 	public Cell getCell (Component Component) {
 		return layout.getCell(Component);
+	}
+
+	/** Returns the cell with the specified name, anywhere in the table hierarchy.
+	 * @see TableLayout#getCell(String) */
+	public Cell getCell (String name) {
+		return layout.getCell(name);
+	}
+
+	/** Returns all cells, anywhere in the table hierarchy.
+	 * @see TableLayout#getAllCells() */
+	public List<Cell> getAllCells () {
+		return layout.getAllCells();
+	}
+
+	/** Returns all cells with the specified name prefix, anywhere in the table hierarchy.
+	 * @see TableLayout#getAllCells(String) */
+	public List<Cell> getAllCells (String namePrefix) {
+		return layout.getAllCells(namePrefix);
 	}
 
 	/** Returns the cells for this table.
@@ -130,85 +174,133 @@ public class Table extends JComponent {
 		return layout.getCells();
 	}
 
+	/** Sets the Component in the cell with the specified name.
+	 * @see TableLayout#setWidget(String, Component) */
+	public void setWidget (String name, Component Component) {
+		layout.setWidget(name, Component);
+	}
+
+	/** The fixed size of the table.
+	 * @see TableLayout#size(String, String) */
+	public Table size (String width, String height) {
+		layout.size(width, height);
+		return this;
+	}
+
+	/** The fixed width of the table, or null.
+	 * @see TableLayout#width(String) */
+	public Table width (String width) {
+		layout.width(width);
+		return this;
+	}
+
+	/** The fixed height of the table, or null.
+	 * @see TableLayout#height(String) */
+	public Table height (String height) {
+		layout.height(height);
+		return this;
+	}
+
+	/** The fixed size of the table.
+	 * @see TableLayout#size(int, int) */
+	public Table size (int width, int height) {
+		layout.size(width, height);
+		return this;
+	}
+
+	/** The fixed width of the table.
+	 * @see TableLayout#width(int) */
+	public Table width (int width) {
+		layout.width(width);
+		return this;
+	}
+
+	/** The fixed height of the table.
+	 * @see TableLayout#height(int) */
+	public Table height (int height) {
+		layout.height(height);
+		return this;
+	}
+
 	/** Padding around the table.
-	 * @see TableLayout#pad(Value) */
-	public Table pad (Value pad) {
+	 * @see TableLayout#pad(String) */
+	public Table pad (String pad) {
 		layout.pad(pad);
 		return this;
 	}
 
 	/** Padding around the table.
-	 * @see TableLayout#pad(Value, Value, Value, Value) */
-	public Table pad (Value top, Value left, Value bottom, Value right) {
+	 * @see TableLayout#pad(String, String, String, String) */
+	public Table pad (String top, String left, String bottom, String right) {
 		layout.pad(top, left, bottom, right);
 		return this;
 	}
 
 	/** Padding at the top of the table.
-	 * @see TableLayout#padTop(Value) */
-	public Table padTop (Value padTop) {
+	 * @see TableLayout#padTop(String) */
+	public Table padTop (String padTop) {
 		layout.padTop(padTop);
 		return this;
 	}
 
 	/** Padding at the left of the table.
-	 * @see TableLayout#padLeft(Value) */
-	public Table padLeft (Value padLeft) {
+	 * @see TableLayout#padLeft(String) */
+	public Table padLeft (String padLeft) {
 		layout.padLeft(padLeft);
 		return this;
 	}
 
 	/** Padding at the bottom of the table.
-	 * @see TableLayout#padBottom(Value) */
-	public Table padBottom (Value padBottom) {
+	 * @see TableLayout#padBottom(String) */
+	public Table padBottom (String padBottom) {
 		layout.padBottom(padBottom);
 		return this;
 	}
 
 	/** Padding at the right of the table.
-	 * @see TableLayout#padRight(Value) */
-	public Table padRight (Value padRight) {
+	 * @see TableLayout#padRight(String) */
+	public Table padRight (String padRight) {
 		layout.padRight(padRight);
 		return this;
 	}
 
 	/** Padding around the table.
-	 * @see TableLayout#pad(float) */
+	 * @see TableLayout#pad(int) */
 	public Table pad (int pad) {
 		layout.pad(pad);
 		return this;
 	}
 
 	/** Padding around the table.
-	 * @see TableLayout#pad(float, float, float, float) */
+	 * @see TableLayout#pad(int, int, int, int) */
 	public Table pad (int top, int left, int bottom, int right) {
 		layout.pad(top, left, bottom, right);
 		return this;
 	}
 
 	/** Padding at the top of the table.
-	 * @see TableLayout#padTop(float) */
+	 * @see TableLayout#padTop(int) */
 	public Table padTop (int padTop) {
 		layout.padTop(padTop);
 		return this;
 	}
 
 	/** Padding at the left of the table.
-	 * @see TableLayout#padLeft(float) */
+	 * @see TableLayout#padLeft(int) */
 	public Table padLeft (int padLeft) {
 		layout.padLeft(padLeft);
 		return this;
 	}
 
 	/** Padding at the bottom of the table.
-	 * @see TableLayout#padBottom(float) */
+	 * @see TableLayout#padBottom(int) */
 	public Table padBottom (int padBottom) {
 		layout.padBottom(padBottom);
 		return this;
 	}
 
 	/** Padding at the right of the table.
-	 * @see TableLayout#padRight(float) */
+	 * @see TableLayout#padRight(int) */
 	public Table padRight (int padRight) {
 		layout.padRight(padRight);
 		return this;
@@ -220,6 +312,14 @@ public class Table extends JComponent {
 	 * @see TableLayout#align(int) */
 	public Table align (int align) {
 		layout.align(align);
+		return this;
+	}
+
+	/** Alignment of the table within the Component being laid out. Set to "center", "top", "bottom", "left", "right", or a string
+	 * containing any combination of those.
+	 * @see TableLayout#align(String) */
+	public Table align (String value) {
+		layout.align(value);
 		return this;
 	}
 
@@ -265,30 +365,40 @@ public class Table extends JComponent {
 		return this;
 	}
 
-	/** Turns on debug lines.
+	/** Turns on debug lines. Set to {@value TableLayout#DEBUG_ALL}, {@value TableLayout#DEBUG_TABLE},
+	 * {@value TableLayout#DEBUG_CELL}, {@value TableLayout#DEBUG_WIDGET}, or any combination of those. Set to
+	 * {@value TableLayout#DEBUG_NONE} to disable.
 	 * @see TableLayout#debug() */
-	public Table debug (Debug debug) {
+	public Table debug (int debug) {
 		layout.debug(debug);
 		return this;
 	}
 
-	public Debug getDebug () {
+	/** Turns on debug lines. Set to "all", "table", "cell", "widget", or a string containing any combination of those. Set to null
+	 * to disable.
+	 * @see TableLayout#debug(String) */
+	public Table debug (String value) {
+		layout.debug(value);
+		return this;
+	}
+
+	public int getDebug () {
 		return layout.getDebug();
 	}
 
-	public Value getPadTop () {
+	public String getPadTop () {
 		return layout.getPadTop();
 	}
 
-	public Value getPadLeft () {
+	public String getPadLeft () {
 		return layout.getPadLeft();
 	}
 
-	public Value getPadBottom () {
+	public String getPadBottom () {
 		return layout.getPadBottom();
 	}
 
-	public Value getPadRight () {
+	public String getPadRight () {
 		return layout.getPadRight();
 	}
 

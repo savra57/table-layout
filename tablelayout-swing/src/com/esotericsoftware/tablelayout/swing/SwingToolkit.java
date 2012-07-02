@@ -3,64 +3,97 @@ package com.esotericsoftware.tablelayout.swing;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.LayoutManager;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
-import com.esotericsoftware.tablelayout.BaseTableLayout.Debug;
 import com.esotericsoftware.tablelayout.Toolkit;
 
-class SwingToolkit extends Toolkit<Component, Table, TableLayout> {
+public class SwingToolkit extends Toolkit<Component, Table, TableLayout> {
+	static {
+		addClassPrefix("javax.swing.");
+		addClassPrefix("java.awt.");
+	}
+
 	static SwingToolkit instance = new SwingToolkit();
 	static Timer timer;
 	static ArrayList<TableLayout> debugLayouts = new ArrayList(0);
 
-	public void addChild (Component parent, Component child) {
+	public Table newTable (Table parent) {
+		return new Table();
+	}
+
+	public void addChild (Component parent, Component child, String layoutString) {
+		if (parent instanceof JSplitPane && layoutString == null) {
+			if (((JSplitPane)parent).getLeftComponent() instanceof JButton)
+				layoutString = "left";
+			else if (((JSplitPane)parent).getRightComponent() instanceof JButton) //
+				layoutString = "right";
+		}
+
 		if (parent instanceof JScrollPane)
 			((JScrollPane)parent).setViewportView(child);
 		else
-			((Container)parent).add(child);
+			((Container)parent).add(child, layoutString);
 	}
 
 	public void removeChild (Component parent, Component child) {
 		((Container)parent).remove(child);
 	}
 
-	public float getMinWidth (Component widget) {
+	public Component wrap (TableLayout layout, Object object) {
+		if (object instanceof String) return new JLabel((String)object);
+		if (object == null) {
+			JPanel empty = new JPanel();
+			Dimension size = new Dimension();
+			empty.setMinimumSize(size);
+			empty.setPreferredSize(size);
+			return empty;
+		}
+		if (object instanceof LayoutManager) return new JPanel((LayoutManager)object);
+		return super.wrap(layout, object);
+	}
+
+	public Component newStack () {
+		return new Stack();
+	}
+
+	public int getMinWidth (Component widget) {
 		return widget.getMinimumSize().width;
 	}
 
-	public float getMinHeight (Component widget) {
+	public int getMinHeight (Component widget) {
 		return widget.getMinimumSize().height;
 	}
 
-	public float getPrefWidth (Component widget) {
+	public int getPrefWidth (Component widget) {
 		return widget.getPreferredSize().width;
 	}
 
-	public float getPrefHeight (Component widget) {
+	public int getPrefHeight (Component widget) {
 		return widget.getPreferredSize().height;
 	}
 
-	public float getMaxWidth (Component widget) {
+	public int getMaxWidth (Component widget) {
 		return widget.getMaximumSize().width;
 	}
 
-	public float getMaxHeight (Component widget) {
+	public int getMaxHeight (Component widget) {
 		return widget.getMaximumSize().height;
 	}
 
-	public float getWidth (Component widget) {
-		return widget.getWidth();
-	}
-
-	public float getHeight (Component widget) {
-		return widget.getHeight();
+	public TableLayout getLayout (Table table) {
+		return table.getTableLayout();
 	}
 
 	public void clearDebugRectangles (TableLayout layout) {
@@ -68,7 +101,7 @@ class SwingToolkit extends Toolkit<Component, Table, TableLayout> {
 		layout.debugRects = null;
 	}
 
-	public void addDebugRectangle (TableLayout layout, Debug type, float x, float y, float w, float h) {
+	public void addDebugRectangle (TableLayout layout, int type, int x, int y, int w, int h) {
 		if (layout.debugRects == null) {
 			layout.debugRects = new ArrayList();
 			debugLayouts.add(layout);
@@ -96,15 +129,11 @@ class SwingToolkit extends Toolkit<Component, Table, TableLayout> {
 		};
 	}
 
-	static class DebugRect {
-		final Debug type;
-		final int x, y, width, height;
+	static class DebugRect extends Rectangle {
+		final int type;
 
-		public DebugRect (Debug type, float x, float y, float width, float height) {
-			this.x = (int)x;
-			this.y = (int)y;
-			this.width = (int)(width - 1);
-			this.height = (int)(height - 1);
+		public DebugRect (int type, int x, int y, int width, int height) {
+			super(x, y, width - 1, height - 1);
 			this.type = type;
 		}
 	}

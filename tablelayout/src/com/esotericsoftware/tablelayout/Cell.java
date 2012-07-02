@@ -27,34 +27,33 @@
 
 package com.esotericsoftware.tablelayout;
 
-import com.esotericsoftware.tablelayout.Value.FixedValue;
-
 import static com.esotericsoftware.tablelayout.BaseTableLayout.*;
 
-/** A cell in a table.
- * @author Nathan Sweet */
+/** @author Nathan Sweet */
 public class Cell<C> {
-	Value minWidth, minHeight;
-	Value prefWidth, prefHeight;
-	Value maxWidth, maxHeight;
-	Value spaceTop, spaceLeft, spaceBottom, spaceRight;
-	Value padTop, padLeft, padBottom, padRight;
+	String minWidth, minHeight;
+	String prefWidth, prefHeight;
+	String maxWidth, maxHeight;
+	String spaceTop, spaceLeft, spaceBottom, spaceRight;
+	String padTop, padLeft, padBottom, padRight;
 	Float fillX, fillY;
 	Integer align;
 	Integer expandX, expandY;
 	Boolean ignore;
 	Integer colspan;
 	Boolean uniformX, uniformY;
+	String name;
+	Integer scaling;
 
 	C widget;
-	float widgetX, widgetY;
-	float widgetWidth, widgetHeight;
+	int widgetX, widgetY;
+	int widgetWidth, widgetHeight;
 
 	private final BaseTableLayout layout;
 	boolean endRow;
 	int column, row;
 	int cellAboveIndex = -1;
-	float computedPadTop, computedPadLeft, computedPadBottom, computedPadRight;
+	int computedPadTop, computedPadLeft, computedPadBottom, computedPadRight;
 
 	Cell (BaseTableLayout layout) {
 		this.layout = layout;
@@ -84,6 +83,7 @@ public class Cell<C> {
 		colspan = defaults.colspan;
 		uniformX = defaults.uniformX;
 		uniformY = defaults.uniformY;
+		scaling = defaults.scaling;
 	}
 
 	void merge (Cell cell) {
@@ -111,22 +111,24 @@ public class Cell<C> {
 		if (cell.colspan != null) colspan = cell.colspan;
 		if (cell.uniformX != null) uniformX = cell.uniformX;
 		if (cell.uniformY != null) uniformY = cell.uniformY;
+		if (cell.scaling != null) scaling = cell.scaling;
 	}
 
-	/** Sets the widget in this cell and adds the widget to the cell's table. */
 	public Cell setWidget (C widget) {
 		if (widget == null) throw new IllegalArgumentException("widget cannot be null.");
 		layout.toolkit.setWidget(layout, this, widget);
 		return this;
 	}
 
-	/** Returns the widget for this cell, or null. */
+	public String getName () {
+		return name;
+	}
+
 	public C getWidget () {
 		return widget;
 	}
 
-	/** Sets the minWidth, prefWidth, maxWidth, minHeight, prefHeight, and maxHeight to the specified value. */
-	public Cell size (Value size) {
+	public Cell size (String size) {
 		minWidth = size;
 		minHeight = size;
 		prefWidth = size;
@@ -136,8 +138,7 @@ public class Cell<C> {
 		return this;
 	}
 
-	/** Sets the minWidth, prefWidth, maxWidth, minHeight, prefHeight, and maxHeight to the specified values. */
-	public Cell size (Value width, Value height) {
+	public Cell size (String width, String height) {
 		minWidth = width;
 		minHeight = height;
 		prefWidth = width;
@@ -147,192 +148,173 @@ public class Cell<C> {
 		return this;
 	}
 
-	/** Sets the minWidth, prefWidth, maxWidth, minHeight, prefHeight, and maxHeight to the specified value. */
-	public Cell size (float size) {
-		size(new FixedValue(size));
+	public Cell size (int size) {
+		size(String.valueOf(size));
 		return this;
 	}
 
-	/** Sets the minWidth, prefWidth, maxWidth, minHeight, prefHeight, and maxHeight to the specified values. */
-	public Cell size (float width, float height) {
-		size(new FixedValue(width), new FixedValue(height));
+	public Cell size (int width, int height) {
+		size(String.valueOf(width), String.valueOf(height));
 		return this;
 	}
 
-	/** Sets the minWidth, prefWidth, and maxWidth to the specified value. */
-	public Cell width (Value width) {
+	public Cell width (String width) {
 		minWidth = width;
 		prefWidth = width;
 		maxWidth = width;
 		return this;
 	}
 
-	/** Sets the minWidth, prefWidth, and maxWidth to the specified value. */
-	public Cell width (float width) {
-		width(new FixedValue(width));
+	public Cell width (int width) {
+		width(String.valueOf(width));
 		return this;
 	}
 
-	/** Sets the minHeight, prefHeight, and maxHeight to the specified value. */
-	public Cell height (Value height) {
+	public Cell height (String height) {
 		minHeight = height;
 		prefHeight = height;
 		maxHeight = height;
 		return this;
 	}
 
-	/** Sets the minHeight, prefHeight, and maxHeight to the specified value. */
-	public Cell height (float height) {
-		height(new FixedValue(height));
+	public Cell height (int height) {
+		height(String.valueOf(height));
 		return this;
 	}
 
-	/** Sets the minWidth and minHeight to the specified value. */
-	public Cell minSize (Value size) {
+	public Cell minSize (String size) {
 		minWidth = size;
 		minHeight = size;
 		return this;
 	}
 
-	/** Sets the minWidth and minHeight to the specified values. */
-	public Cell minSize (Value width, Value height) {
+	public Cell minSize (String width, String height) {
 		minWidth = width;
 		minHeight = height;
 		return this;
 	}
 
-	public Cell minWidth (Value minWidth) {
+	public Cell minWidth (String minWidth) {
 		this.minWidth = minWidth;
 		return this;
 	}
 
-	public Cell minHeight (Value minHeight) {
+	public Cell minHeight (String minHeight) {
 		this.minHeight = minHeight;
 		return this;
 	}
 
-	/** Sets the minWidth and minHeight to the specified value. */
-	public Cell minSize (float size) {
-		minWidth = new FixedValue(size);
-		minHeight = new FixedValue(size);
+	public Cell minSize (int size) {
+		minWidth = String.valueOf(size);
+		minHeight = String.valueOf(size);
 		return this;
 	}
 
-	/** Sets the minWidth and minHeight to the specified values. */
-	public Cell minSize (float width, float height) {
-		minWidth = new FixedValue(width);
-		minHeight = new FixedValue(height);
+	public Cell minSize (int width, int height) {
+		minWidth = String.valueOf(width);
+		minHeight = String.valueOf(height);
 		return this;
 	}
 
-	public Cell minWidth (float minWidth) {
-		this.minWidth = new FixedValue(minWidth);
+	public Cell minWidth (int minWidth) {
+		this.minWidth = String.valueOf(minWidth);
 		return this;
 	}
 
-	public Cell minHeight (float minHeight) {
-		this.minHeight = new FixedValue(minHeight);
+	public Cell minHeight (int minHeight) {
+		this.minHeight = String.valueOf(minHeight);
 		return this;
 	}
 
-	/** Sets the prefWidth and prefHeight to the specified value. */
-	public Cell prefSize (Value size) {
+	public Cell prefSize (String size) {
 		prefWidth = size;
 		prefHeight = size;
 		return this;
 	}
 
-	/** Sets the prefWidth and prefHeight to the specified values. */
-	public Cell prefSize (Value width, Value height) {
+	public Cell prefSize (String width, String height) {
 		prefWidth = width;
 		prefHeight = height;
 		return this;
 	}
 
-	public Cell prefWidth (Value prefWidth) {
+	public Cell prefWidth (String prefWidth) {
 		this.prefWidth = prefWidth;
 		return this;
 	}
 
-	public Cell prefHeight (Value prefHeight) {
+	public Cell prefHeight (String prefHeight) {
 		this.prefHeight = prefHeight;
 		return this;
 	}
 
-	/** Sets the prefWidth and prefHeight to the specified value. */
-	public Cell prefSize (float width, float height) {
-		prefWidth = new FixedValue(width);
-		prefHeight = new FixedValue(height);
+	public Cell prefSize (int width, int height) {
+		prefWidth = String.valueOf(width);
+		prefHeight = String.valueOf(height);
 		return this;
 	}
 
-	/** Sets the prefWidth and prefHeight to the specified values. */
-	public Cell prefSize (float size) {
-		prefWidth = new FixedValue(size);
-		prefHeight = new FixedValue(size);
+	public Cell prefSize (int size) {
+		prefWidth = String.valueOf(size);
+		prefHeight = String.valueOf(size);
 		return this;
 	}
 
-	public Cell prefWidth (float prefWidth) {
-		this.prefWidth = new FixedValue(prefWidth);
+	public Cell prefWidth (int prefWidth) {
+		this.prefWidth = String.valueOf(prefWidth);
 		return this;
 	}
 
-	public Cell prefHeight (float prefHeight) {
-		this.prefHeight = new FixedValue(prefHeight);
+	public Cell prefHeight (int prefHeight) {
+		this.prefHeight = String.valueOf(prefHeight);
 		return this;
 	}
 
-	/** Sets the maxWidth and maxHeight to the specified value. */
-	public Cell maxSize (Value size) {
+	public Cell maxSize (String size) {
 		maxWidth = size;
 		maxHeight = size;
 		return this;
 	}
 
-	/** Sets the maxWidth and maxHeight to the specified values. */
-	public Cell maxSize (Value width, Value height) {
+	public Cell maxSize (String width, String height) {
 		maxWidth = width;
 		maxHeight = height;
 		return this;
 	}
 
-	public Cell maxWidth (Value maxWidth) {
+	public Cell maxWidth (String maxWidth) {
 		this.maxWidth = maxWidth;
 		return this;
 	}
 
-	public Cell maxHeight (Value maxHeight) {
+	public Cell maxHeight (String maxHeight) {
 		this.maxHeight = maxHeight;
 		return this;
 	}
 
-	/** Sets the maxWidth and maxHeight to the specified value. */
-	public Cell maxSize (float size) {
-		maxWidth = new FixedValue(size);
-		maxHeight = new FixedValue(size);
+	public Cell maxSize (int size) {
+		maxWidth = String.valueOf(size);
+		maxHeight = String.valueOf(size);
 		return this;
 	}
 
-	/** Sets the maxWidth and maxHeight to the specified values. */
-	public Cell maxSize (float width, float height) {
-		maxWidth = new FixedValue(width);
-		maxHeight = new FixedValue(height);
+	public Cell maxSize (int width, int height) {
+		maxWidth = String.valueOf(width);
+		maxHeight = String.valueOf(height);
 		return this;
 	}
 
-	public Cell maxWidth (float maxWidth) {
-		this.maxWidth = new FixedValue(maxWidth);
+	public Cell maxWidth (int maxWidth) {
+		this.maxWidth = String.valueOf(maxWidth);
 		return this;
 	}
 
-	public Cell maxHeight (float maxHeight) {
-		this.maxHeight = new FixedValue(maxHeight);
+	public Cell maxHeight (int maxHeight) {
+		this.maxHeight = String.valueOf(maxHeight);
 		return this;
 	}
 
-	/** Sets the spaceTop, spaceLeft, spaceBottom, and spaceRight to the specified value. */
-	public Cell space (Value space) {
+	public Cell space (String space) {
 		spaceTop = space;
 		spaceLeft = space;
 		spaceBottom = space;
@@ -340,7 +322,7 @@ public class Cell<C> {
 		return this;
 	}
 
-	public Cell space (Value top, Value left, Value bottom, Value right) {
+	public Cell space (String top, String left, String bottom, String right) {
 		spaceTop = top;
 		spaceLeft = left;
 		spaceBottom = bottom;
@@ -348,29 +330,28 @@ public class Cell<C> {
 		return this;
 	}
 
-	public Cell spaceTop (Value spaceTop) {
+	public Cell spaceTop (String spaceTop) {
 		this.spaceTop = spaceTop;
 		return this;
 	}
 
-	public Cell spaceLeft (Value spaceLeft) {
+	public Cell spaceLeft (String spaceLeft) {
 		this.spaceLeft = spaceLeft;
 		return this;
 	}
 
-	public Cell spaceBottom (Value spaceBottom) {
+	public Cell spaceBottom (String spaceBottom) {
 		this.spaceBottom = spaceBottom;
 		return this;
 	}
 
-	public Cell spaceRight (Value spaceRight) {
+	public Cell spaceRight (String spaceRight) {
 		this.spaceRight = spaceRight;
 		return this;
 	}
 
-	/** Sets the spaceTop, spaceLeft, spaceBottom, and spaceRight to the specified value. */
-	public Cell space (float space) {
-		Value value = new FixedValue(space);
+	public Cell space (int space) {
+		String value = String.valueOf(space);
 		spaceTop = value;
 		spaceLeft = value;
 		spaceBottom = value;
@@ -378,36 +359,35 @@ public class Cell<C> {
 		return this;
 	}
 
-	public Cell space (float top, float left, float bottom, float right) {
-		spaceTop = new FixedValue(top);
-		spaceLeft = new FixedValue(left);
-		spaceBottom = new FixedValue(bottom);
-		spaceRight = new FixedValue(right);
+	public Cell space (int top, int left, int bottom, int right) {
+		spaceTop = String.valueOf(top);
+		spaceLeft = String.valueOf(left);
+		spaceBottom = String.valueOf(bottom);
+		spaceRight = String.valueOf(right);
 		return this;
 	}
 
-	public Cell spaceTop (float spaceTop) {
-		this.spaceTop = new FixedValue(spaceTop);
+	public Cell spaceTop (int spaceTop) {
+		this.spaceTop = String.valueOf(spaceTop);
 		return this;
 	}
 
-	public Cell spaceLeft (float spaceLeft) {
-		this.spaceLeft = new FixedValue(spaceLeft);
+	public Cell spaceLeft (int spaceLeft) {
+		this.spaceLeft = String.valueOf(spaceLeft);
 		return this;
 	}
 
-	public Cell spaceBottom (float spaceBottom) {
-		this.spaceBottom = new FixedValue(spaceBottom);
+	public Cell spaceBottom (int spaceBottom) {
+		this.spaceBottom = String.valueOf(spaceBottom);
 		return this;
 	}
 
-	public Cell spaceRight (float spaceRight) {
-		this.spaceRight = new FixedValue(spaceRight);
+	public Cell spaceRight (int spaceRight) {
+		this.spaceRight = String.valueOf(spaceRight);
 		return this;
 	}
 
-	/** Sets the padTop, padLeft, padBottom, and padRight to the specified value. */
-	public Cell pad (Value pad) {
+	public Cell pad (String pad) {
 		padTop = pad;
 		padLeft = pad;
 		padBottom = pad;
@@ -415,7 +395,7 @@ public class Cell<C> {
 		return this;
 	}
 
-	public Cell pad (Value top, Value left, Value bottom, Value right) {
+	public Cell pad (String top, String left, String bottom, String right) {
 		padTop = top;
 		padLeft = left;
 		padBottom = bottom;
@@ -423,29 +403,28 @@ public class Cell<C> {
 		return this;
 	}
 
-	public Cell padTop (Value padTop) {
+	public Cell padTop (String padTop) {
 		this.padTop = padTop;
 		return this;
 	}
 
-	public Cell padLeft (Value padLeft) {
+	public Cell padLeft (String padLeft) {
 		this.padLeft = padLeft;
 		return this;
 	}
 
-	public Cell padBottom (Value padBottom) {
+	public Cell padBottom (String padBottom) {
 		this.padBottom = padBottom;
 		return this;
 	}
 
-	public Cell padRight (Value padRight) {
+	public Cell padRight (String padRight) {
 		this.padRight = padRight;
 		return this;
 	}
 
-	/** Sets the padTop, padLeft, padBottom, and padRight to the specified value. */
-	public Cell pad (float pad) {
-		Value value = new FixedValue(pad);
+	public Cell pad (int pad) {
+		String value = String.valueOf(pad);
 		padTop = value;
 		padLeft = value;
 		padBottom = value;
@@ -453,48 +432,45 @@ public class Cell<C> {
 		return this;
 	}
 
-	public Cell pad (float top, float left, float bottom, float right) {
-		padTop = new FixedValue(top);
-		padLeft = new FixedValue(left);
-		padBottom = new FixedValue(bottom);
-		padRight = new FixedValue(right);
+	public Cell pad (int top, int left, int bottom, int right) {
+		padTop = String.valueOf(top);
+		padLeft = String.valueOf(left);
+		padBottom = String.valueOf(bottom);
+		padRight = String.valueOf(right);
 		return this;
 	}
 
-	public Cell padTop (float padTop) {
-		this.padTop = new FixedValue(padTop);
+	public Cell padTop (int padTop) {
+		this.padTop = String.valueOf(padTop);
 		return this;
 	}
 
-	public Cell padLeft (float padLeft) {
-		this.padLeft = new FixedValue(padLeft);
+	public Cell padLeft (int padLeft) {
+		this.padLeft = String.valueOf(padLeft);
 		return this;
 	}
 
-	public Cell padBottom (float padBottom) {
-		this.padBottom = new FixedValue(padBottom);
+	public Cell padBottom (int padBottom) {
+		this.padBottom = String.valueOf(padBottom);
 		return this;
 	}
 
-	public Cell padRight (float padRight) {
-		this.padRight = new FixedValue(padRight);
+	public Cell padRight (int padRight) {
+		this.padRight = String.valueOf(padRight);
 		return this;
 	}
 
-	/** Sets fillX and fillY to 1. */
 	public Cell fill () {
 		fillX = 1f;
 		fillY = 1f;
 		return this;
 	}
 
-	/** Sets fillX to 1. */
 	public Cell fillX () {
 		fillX = 1f;
 		return this;
 	}
 
-	/** Sets fillY to 1. */
 	public Cell fillY () {
 		fillY = 1f;
 		return this;
@@ -506,34 +482,36 @@ public class Cell<C> {
 		return this;
 	}
 
-	/** Sets fillX and fillY to 1 if true, 0 if false. */
 	public Cell fill (boolean x, boolean y) {
 		fillX = x ? 1f : 0;
 		fillY = y ? 1f : 0;
 		return this;
 	}
 
-	/** Sets fillX and fillY to 1 if true, 0 if false. */
-	public Cell fill (boolean fill) {
-		fillX = fill ? 1f : 0;
-		fillY = fill ? 1f : 0;
-		return this;
-	}
-
-	/** Sets the alignment of the widget within the cell. Set to {@link #CENTER}, {@link #TOP}, {@link #BOTTOM}, {@link #LEFT},
+	/** Alignment of the widget within the cell. Set to {@link #CENTER}, {@link #TOP}, {@link #BOTTOM}, {@link #LEFT},
 	 * {@link #RIGHT}, or any combination of those. */
 	public Cell align (Integer align) {
 		this.align = align;
 		return this;
 	}
 
-	/** Sets the alignment of the widget within the cell to {@link #CENTER}. This clears any other alignment. */
+	/** Alignment of the widget within the cell. Set to "center", "top", "bottom", "left", "right", or a string containing any
+	 * combination of those. */
+	public Cell align (String value) {
+		align = 0;
+		if (value.contains("center")) align |= CENTER;
+		if (value.contains("left")) align |= LEFT;
+		if (value.contains("right")) align |= RIGHT;
+		if (value.contains("top")) align |= TOP;
+		if (value.contains("bottom")) align |= BOTTOM;
+		return this;
+	}
+
 	public Cell center () {
 		align = CENTER;
 		return this;
 	}
 
-	/** Adds {@link #TOP} and clears {@link #BOTTOM} for the alignment of the widget within the cell. */
 	public Cell top () {
 		if (align == null)
 			align = TOP;
@@ -544,7 +522,6 @@ public class Cell<C> {
 		return this;
 	}
 
-	/** Adds {@link #LEFT} and clears {@link #RIGHT} for the alignment of the widget within the cell. */
 	public Cell left () {
 		if (align == null)
 			align = LEFT;
@@ -555,7 +532,6 @@ public class Cell<C> {
 		return this;
 	}
 
-	/** Adds {@link #BOTTOM} and clears {@link #TOP} for the alignment of the widget within the cell. */
 	public Cell bottom () {
 		if (align == null)
 			align = BOTTOM;
@@ -566,7 +542,6 @@ public class Cell<C> {
 		return this;
 	}
 
-	/** Adds {@link #RIGHT} and clears {@link #LEFT} for the alignment of the widget within the cell. */
 	public Cell right () {
 		if (align == null)
 			align = RIGHT;
@@ -577,20 +552,17 @@ public class Cell<C> {
 		return this;
 	}
 
-	/** Sets expandX and expandY to 1. */
 	public Cell expand () {
 		expandX = 1;
 		expandY = 1;
 		return this;
 	}
 
-	/** Sets expandX to 1. */
 	public Cell expandX () {
 		expandX = 1;
 		return this;
 	}
 
-	/** Sets expandY to 1. */
 	public Cell expandY () {
 		expandY = 1;
 		return this;
@@ -602,7 +574,6 @@ public class Cell<C> {
 		return this;
 	}
 
-	/** Sets expandX and expandY to 1 if true, 0 if false. */
 	public Cell expand (boolean x, boolean y) {
 		expandX = x ? 1 : 0;
 		expandY = y ? 1 : 0;
@@ -614,7 +585,6 @@ public class Cell<C> {
 		return this;
 	}
 
-	/** Sets ignore to true. */
 	public Cell ignore () {
 		this.ignore = true;
 		return this;
@@ -629,20 +599,17 @@ public class Cell<C> {
 		return this;
 	}
 
-	/** Sets uniformX and uniformY to true. */
 	public Cell uniform () {
 		uniformX = true;
 		uniformY = true;
 		return this;
 	}
 
-	/** Sets uniformX to true. */
 	public Cell uniformX () {
 		uniformX = true;
 		return this;
 	}
 
-	/** Sets uniformY to true. */
 	public Cell uniformY () {
 		uniformY = true;
 		return this;
@@ -654,19 +621,34 @@ public class Cell<C> {
 		return this;
 	}
 
-	public float getWidgetX () {
+	public Cell scaling (String scaling) {
+		if (scaling.equals("fit"))
+			this.scaling = SCALE_FIT;
+		else if (scaling.equals("fill"))
+			this.scaling = SCALE_FILL;
+		else
+			this.scaling = SCALE_STRETCH;
+		return this;
+	}
+
+	public Cell scaling (Integer scaling) {
+		this.scaling = scaling;
+		return this;
+	}
+
+	public int getWidgetX () {
 		return widgetX;
 	}
 
-	public float getWidgetY () {
+	public int getWidgetY () {
 		return widgetY;
 	}
 
-	public float getWidgetWidth () {
+	public int getWidgetWidth () {
 		return widgetWidth;
 	}
 
-	public float getWidgetHeight () {
+	public int getWidgetHeight () {
 		return widgetHeight;
 	}
 
@@ -678,59 +660,59 @@ public class Cell<C> {
 		return row;
 	}
 
-	public Value getMinWidth () {
+	public String getMinWidth () {
 		return minWidth;
 	}
 
-	public Value getMinHeight () {
+	public String getMinHeight () {
 		return minHeight;
 	}
 
-	public Value getPrefWidth () {
+	public String getPrefWidth () {
 		return prefWidth;
 	}
 
-	public Value getPrefHeight () {
+	public String getPrefHeight () {
 		return prefHeight;
 	}
 
-	public Value getMaxWidth () {
+	public String getMaxWidth () {
 		return maxWidth;
 	}
 
-	public Value getMaxHeight () {
+	public String getMaxHeight () {
 		return maxHeight;
 	}
 
-	public Value getSpaceTop () {
+	public String getSpaceTop () {
 		return spaceTop;
 	}
 
-	public Value getSpaceLeft () {
+	public String getSpaceLeft () {
 		return spaceLeft;
 	}
 
-	public Value getSpaceBottom () {
+	public String getSpaceBottom () {
 		return spaceBottom;
 	}
 
-	public Value getSpaceRight () {
+	public String getSpaceRight () {
 		return spaceRight;
 	}
 
-	public Value getPadTop () {
+	public String getPadTop () {
 		return padTop;
 	}
 
-	public Value getPadLeft () {
+	public String getPadLeft () {
 		return padLeft;
 	}
 
-	public Value getPadBottom () {
+	public String getPadBottom () {
 		return padBottom;
 	}
 
-	public Value getPadRight () {
+	public String getPadRight () {
 		return padRight;
 	}
 
@@ -766,42 +748,38 @@ public class Cell<C> {
 		return uniformY;
 	}
 
+	public Integer getScaling () {
+		return scaling;
+	}
+
 	public boolean isEndRow () {
 		return endRow;
 	}
 
-	/** The actual amount of space computed from padding and spacing from the last layout. */
-	public float getComputedPadTop () {
+	public int getComputedPadTop () {
 		return computedPadTop;
 	}
 
-	/** The actual amount of space computed from padding and spacing from the last layout. */
-	public float getComputedPadLeft () {
+	public int getComputedPadLeft () {
 		return computedPadLeft;
 	}
 
-	/** The actual amount of space computed from padding and spacing from the last layout. */
-	public float getComputedPadBottom () {
+	public int getComputedPadBottom () {
 		return computedPadBottom;
 	}
 
-	/** The actual amount of space computed from padding and spacing from the last layout. */
-	public float getComputedPadRight () {
+	public int getComputedPadRight () {
 		return computedPadRight;
-	}
-
-	public BaseTableLayout getLayout () {
-		return layout;
 	}
 
 	static Cell defaults (BaseTableLayout layout) {
 		Cell defaults = new Cell(layout);
-		defaults.minWidth = Value.minWidth();
-		defaults.minHeight = Value.minHeight();
-		defaults.prefWidth = Value.prefWidth();
-		defaults.prefHeight = Value.prefHeight();
-		defaults.maxWidth = Value.maxWidth();
-		defaults.maxHeight = Value.maxHeight();
+		defaults.minWidth = MIN;
+		defaults.minHeight = MIN;
+		defaults.prefWidth = PREF;
+		defaults.prefHeight = PREF;
+		defaults.maxWidth = MAX;
+		defaults.maxHeight = MAX;
 		defaults.spaceTop = null;
 		defaults.spaceLeft = null;
 		defaults.spaceBottom = null;
@@ -817,6 +795,7 @@ public class Cell<C> {
 		defaults.expandY = 0;
 		defaults.ignore = false;
 		defaults.colspan = 1;
+		defaults.scaling = SCALE_STRETCH;
 		return defaults;
 	}
 }

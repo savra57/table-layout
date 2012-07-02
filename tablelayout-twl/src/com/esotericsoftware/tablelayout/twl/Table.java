@@ -26,6 +26,10 @@ public class Table extends Widget {
 		return layout.row();
 	}
 
+	public void parse (String tableDescription) {
+		layout.parse(tableDescription);
+	}
+
 	public Cell columnDefaults (int column) {
 		return layout.columnDefaults(column);
 	}
@@ -39,19 +43,19 @@ public class Table extends Widget {
 	}
 
 	public int getMinWidth () {
-		return (int)layout.getMinWidth();
+		return layout.getMinWidth();
 	}
 
 	public int getMinHeight () {
-		return (int)layout.getMinHeight();
+		return layout.getMinHeight();
 	}
 
 	public int getPreferredWidth () {
-		return (int)layout.getPrefWidth();
+		return layout.getPrefWidth();
 	}
 
 	public int getPreferredHeight () {
-		return (int)layout.getPrefHeight();
+		return layout.getPrefHeight();
 	}
 
 	public void invalidateLayout () {

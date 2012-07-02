@@ -13,7 +13,7 @@ import com.esotericsoftware.tablelayout.BaseTableLayout;
 import com.esotericsoftware.tablelayout.Cell;
 import com.esotericsoftware.tablelayout.android.AndroidToolkit.DebugRect;
 
-class TableLayout extends BaseTableLayout<View, Table, TableLayout, AndroidToolkit> {
+public class TableLayout extends BaseTableLayout<View, Table, TableLayout, AndroidToolkit> {
 	ArrayList<View> otherChildren = new ArrayList(1);
 	ArrayList<DebugRect> debugRects;
 
@@ -31,29 +31,34 @@ class TableLayout extends BaseTableLayout<View, Table, TableLayout, AndroidToolk
 		return cell;
 	}
 
-	public void layout (float layoutX, float layoutY, float layoutWidth, float layoutHeight) {
+	public View getWidget (String name) {
+		View view = super.getWidget(name);
+		if (view == null) view = getTable().findViewWithTag(name);
+		return view;
+	}
+
+	public void layout () {
 		List<Cell> cells = getCells();
 		for (int i = 0, n = cells.size(); i < n; i++) {
 			Cell c = cells.get(i);
 			if (c.getIgnore()) continue;
-			((View)c.getWidget()).layout((int)c.getWidgetX(), (int)c.getWidgetY(), //
-				(int)(c.getWidgetX() + c.getWidgetWidth()), //
-				(int)(c.getWidgetY() + c.getWidgetHeight()));
+			((View)c.getWidget()).layout(c.getWidgetX(), c.getWidgetY(), //
+				c.getWidgetX() + c.getWidgetWidth(), //
+				c.getWidgetY() + c.getWidgetHeight());
 		}
 
-		super.layout(layoutX, layoutY, layoutWidth, layoutHeight);
+		super.layout();
 
 		for (int i = 0, n = cells.size(); i < n; i++) {
 			Cell c = cells.get(i);
 			if (c.getIgnore()) continue;
-			((View)c.getWidget()).layout((int)c.getWidgetX(), (int)c.getWidgetY(), //
-				(int)(c.getWidgetX() + c.getWidgetWidth()), //
-				(int)(c.getWidgetY() + c.getWidgetHeight()));
+			((View)c.getWidget()).layout(c.getWidgetX(), c.getWidgetY(), c.getWidgetX() + c.getWidgetWidth(),
+				c.getWidgetY() + c.getWidgetHeight());
 		}
 
 		for (int i = 0, n = otherChildren.size(); i < n; i++) {
 			View child = otherChildren.get(i);
-			child.layout(0, 0, (int)layoutWidth, (int)layoutHeight);
+			child.layout(0, 0, getLayoutWidth(), getLayoutHeight());
 		}
 	}
 
@@ -72,13 +77,13 @@ class TableLayout extends BaseTableLayout<View, Table, TableLayout, AndroidToolk
 	}
 
 	public void drawDebug (Canvas canvas) {
-		if (getDebug() == Debug.none || debugRects == null) return;
+		if (getDebug() == DEBUG_NONE || debugRects == null) return;
 		Paint paint = AndroidToolkit.getDebugPaint();
 		for (int i = 0, n = debugRects.size(); i < n; i++) {
 			DebugRect rect = debugRects.get(i);
-			int r = rect.type == Debug.cell ? 255 : 0;
-			int g = rect.type == Debug.widget ? 255 : 0;
-			int b = rect.type == Debug.table ? 255 : 0;
+			int r = (rect.type & DEBUG_CELL) != 0 ? 255 : 0;
+			int g = (rect.type & DEBUG_WIDGET) != 0 ? 255 : 0;
+			int b = (rect.type & DEBUG_TABLE) != 0 ? 255 : 0;
 			paint.setColor(Color.argb(255, r, g, b));
 			canvas.drawRect(rect.rect, paint);
 		}
